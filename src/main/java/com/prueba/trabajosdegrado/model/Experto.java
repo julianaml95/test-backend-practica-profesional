@@ -11,27 +11,18 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 @Entity
-@Table(name = "respuesta")
+@Table(name = "experto")
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
-public class Respuesta {
+public class Experto {
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
+    @Column(name = "id")
     private Integer id;
 
-    @Column(name = "titulo")
-    private String titulo;
-
-    @Column(name = "solicitud", nullable = false)
-    private Integer solicitud;
-
-    @Column(name = "docente")
-    private Integer docente;
-
-    @Column(name = "experto")
-    private Integer experto;
-
-    @Column(name = "fecha_correcciones")
-    private String fecha_correcciones;
+    private String nombre;
+    private String apellido;
+    private String correo;
+    private String universidad;
 }

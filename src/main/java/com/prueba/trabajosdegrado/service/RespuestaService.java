@@ -1,5 +1,7 @@
 package com.prueba.trabajosdegrado.service;
 
+import java.util.Optional;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -11,7 +13,7 @@ public class RespuestaService {
     @Autowired
     private RespuestaRepository respuestaRepository;
 
-    public Respuesta getRespuestaById(Integer respuestaId) {
+    public Optional<Respuesta> getRespuestaById(Integer respuestaId) {
         return respuestaRepository.getRespuestaById(respuestaId);
     }
 

@@ -21,8 +21,11 @@ public class Document {
     @Column(name = "document_id")
     private Integer documentId;
 
-    @Column(name = "user_id")
-    private Integer userId;
+    @Column(name = "solicitud_id")
+    private Integer solicitudId;
+
+    @Column(name = "evaluacion_id")
+    private Integer evaluacionId;
 
     @Column(name = "file_name")
     private String fileName;
