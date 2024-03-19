@@ -34,6 +34,16 @@ public class Evaluacion {
     @JsonIgnore
     private Respuesta respuesta;
 
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "docente")
+    @JsonIgnore
+    private Docente docente;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "experto")
+    @JsonIgnore
+    private Experto experto;
+
     @Column(name = "doc_formato_b")
     private String docFormatoB;
 
@@ -45,4 +55,7 @@ public class Evaluacion {
 
     @Column(name = "estado_respuesta")
     private String estadoRespuesta;
+
+    @Column(name = "fecha_correcciones")
+    private String fechaCorrecciones;
 }

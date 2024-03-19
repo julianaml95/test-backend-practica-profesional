@@ -37,7 +37,7 @@ public class FileService {
         }
     }
 
-    public String storeFile(MultipartFile file, Integer id, Boolean isSolicitud, String docType) {
+    public String storeFile(MultipartFile file, Integer id, String paramId, String docType) {
         String originalFileName = StringUtils.cleanPath(file.getOriginalFilename());
         String fileName = "";
 
@@ -59,22 +59,30 @@ public class FileService {
             Files.copy(file.getInputStream(), targetLocation, StandardCopyOption.REPLACE_EXISTING);
             Document doc_solicitud = fileRepository.checkDocumentBySolicitudId(id, docType);
             Document doc_evaluacion = fileRepository.checkDocumentByEvaluacionId(id, docType);
+            Document doc_resolucion = fileRepository.checkDocumentByResolucionId(id, docType);
 
-            if (isSolicitud) {
+            if (paramId == "solicitudId") {
                 Document newDoc = new Document();
                 newDoc.setSolicitudId(id);
                 newDoc.setDocumentFormat(file.getContentType());
                 newDoc.setFileName(fileName);
                 newDoc.setDocumentType(docType);
                 fileRepository.save(newDoc);
-            } else if (!isSolicitud) {
+            } else if (paramId == "evaluacionId") {
                 Document newDoc = new Document();
                 newDoc.setEvaluacionId(id);
                 newDoc.setDocumentFormat(file.getContentType());
                 newDoc.setFileName(fileName);
                 newDoc.setDocumentType(docType);
                 fileRepository.save(newDoc);
-            } else if (doc_evaluacion != null || doc_solicitud != null) {
+            } else if (paramId == "resolucionId") {
+                Document newDoc = new Document();
+                newDoc.setResolucionId(id);
+                newDoc.setDocumentFormat(file.getContentType());
+                newDoc.setFileName(fileName);
+                newDoc.setDocumentType(docType);
+                fileRepository.save(newDoc);
+            } else if (doc_evaluacion != null || doc_solicitud != null || doc_resolucion != null) {
                 doc_evaluacion.setDocumentFormat(file.getContentType());
                 doc_evaluacion.setFileName(fileName);
                 fileRepository.save(doc_evaluacion);
@@ -100,14 +108,21 @@ public class FileService {
         }
     }
 
-    public void deleteFile(Integer id, Boolean isSolicitud, String tipoDocumento) throws Exception {
+    public void deleteFile(Integer id, String paramId, String tipoDocumento) throws Exception {
         try {
-            if (isSolicitud) {
+            if (paramId == "solicitudId") {
                 Document solicitud = fileRepository.checkDocumentBySolicitudId(id, tipoDocumento);
                 fileRepository.delete(solicitud);
-            } else if (!isSolicitud) {
+            }
+
+            else if (paramId == "evaluacionId") {
                 Document evaluacion = fileRepository.checkDocumentByEvaluacionId(id, tipoDocumento);
                 fileRepository.delete(evaluacion);
+            }
+
+            else if (paramId == "resolucionId") {
+                Document resolucion = fileRepository.checkDocumentByResolucionId(id, tipoDocumento);
+                fileRepository.delete(resolucion);
             } else {
                 throw new FileNotFoundException("Archivo no encontrado para la solicitud " + id
                         + " y tipo de documento " + tipoDocumento);
@@ -127,5 +142,9 @@ public class FileService {
 
     public String getDocumentEvaluacionName(Integer evaluacionId, String docType) {
         return fileRepository.getUploadEvaluacionDocumentPath(evaluacionId, docType);
+    }
+
+    public String getDocumentResolucionName(Integer resolucionId, String docType) {
+        return fileRepository.getUploadResolucionDocumentPath(resolucionId, docType);
     }
 }

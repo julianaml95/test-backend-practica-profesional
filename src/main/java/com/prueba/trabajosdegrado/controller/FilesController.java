@@ -22,9 +22,11 @@ import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
 import com.prueba.trabajosdegrado.dto.FileResponse;
 import com.prueba.trabajosdegrado.model.Evaluacion;
+import com.prueba.trabajosdegrado.model.Resolucion;
 import com.prueba.trabajosdegrado.model.Solicitud;
 import com.prueba.trabajosdegrado.service.EvaluacionService;
 import com.prueba.trabajosdegrado.service.FileService;
+import com.prueba.trabajosdegrado.service.ResolucionService;
 import com.prueba.trabajosdegrado.service.SolicitudService;
 
 import jakarta.servlet.http.HttpServletRequest;
@@ -42,27 +44,47 @@ public class FilesController {
         @Autowired
         private EvaluacionService evaluacionService;
 
+        @Autowired
+        private ResolucionService resolucionService;
+
         @PostMapping("upload")
         public FileResponse uploadFilesSolicitud(@RequestParam("document") MultipartFile file,
                         @RequestParam(name = "solicitudId", required = false) Integer solicitudId,
                         @RequestParam(name = "evaluacionId", required = false) Integer evaluacionId,
+                        @RequestParam(name = "resolucionId", required = false) Integer resolucionId,
                         @RequestParam("tipoDocumento") String tipoDocumento) {
 
                 Boolean isSolicitud = solicitudId != null;
-                String fileName = fileService.storeFile(file, isSolicitud ? solicitudId : evaluacionId,
-                                isSolicitud,
-                                tipoDocumento);
+                Boolean isEvaluacion = evaluacionId != null;
+                Boolean isResolucion = resolucionId != null;
+
+                String fileName = "";
 
                 if (isSolicitud) {
+                        fileName = fileService.storeFile(file, solicitudId,
+                                        "solicitudId",
+                                        tipoDocumento);
                         Solicitud _solicitud = solicitudService.getSolicitudById(solicitudId);
                         actualizarDocumentoSolicitud(_solicitud, tipoDocumento, fileName);
                         solicitudService.save(_solicitud);
                 }
 
-                if (!isSolicitud) {
+                if (isEvaluacion) {
+                        fileName = fileService.storeFile(file, evaluacionId,
+                                        "evaluacionId",
+                                        tipoDocumento);
                         Evaluacion _evaluacion = evaluacionService.getEvaluacionById(evaluacionId);
                         actualizarDocumentoEvaluacion(_evaluacion, tipoDocumento, fileName);
                         evaluacionService.save(_evaluacion);
+                }
+
+                if (isResolucion) {
+                        fileName = fileService.storeFile(file, resolucionId,
+                                        "resolucionId",
+                                        tipoDocumento);
+                        Resolucion _resolucion = resolucionService.getResolucionById(resolucionId);
+                        actualizarDocumentoResolucion(_resolucion, tipoDocumento, fileName);
+                        resolucionService.save(_resolucion);
                 }
 
                 String fileDownloadUri = ServletUriComponentsBuilder.fromCurrentContextPath()
@@ -107,21 +129,48 @@ public class FilesController {
                 }
         }
 
+        private void actualizarDocumentoResolucion(Resolucion resolucion, String tipoDocumento, String fileName) {
+                switch (tipoDocumento) {
+                        case "anteproyectoAprobado":
+                                resolucion.setAnteproyectoAprobado(fileName);
+                                break;
+                        case "solicitudComite":
+                                resolucion.setSolicitudComite(fileName);
+                                break;
+                        case "solicitudConcejo":
+                                resolucion.setSolicitudConcejo(fileName);
+                                break;
+                        case "resolucionConcejo":
+                                resolucion.setResolucionConcejo(fileName);
+                                break;
+                        default:
+                                // Manejar el caso por defecto
+                }
+        }
+
         @GetMapping("download")
         public ResponseEntity<Resource> downloadFile(
-                        @RequestParam(name = "evaluacionId", required = false) Integer evaluacionId,
                         @RequestParam(name = "solicitudId", required = false) Integer solicitudId,
+                        @RequestParam(name = "evaluacionId", required = false) Integer evaluacionId,
+                        @RequestParam(name = "resolucionId", required = false) Integer resolucionId,
                         @RequestParam("tipoDocumento") String tipoDocumento,
                         HttpServletRequest request) {
 
                 String fileName = null;
                 Boolean isSolicitud = solicitudId != null;
+                Boolean isEvaluacion = evaluacionId != null;
+                Boolean isResolucion = resolucionId != null;
 
                 if (isSolicitud) {
                         fileName = fileService.getDocumentSolicitudName(solicitudId, tipoDocumento);
-                        isSolicitud = true;
-                } else if (!isSolicitud) {
+                }
+
+                if (isEvaluacion) {
                         fileName = fileService.getDocumentEvaluacionName(evaluacionId, tipoDocumento);
+                }
+
+                if (isResolucion) {
+                        fileName = fileService.getDocumentResolucionName(resolucionId, tipoDocumento);
                 }
 
                 if (fileName != null && !fileName.isEmpty()) {
@@ -159,7 +208,6 @@ public class FilesController {
                         @RequestParam("evaluacionId") Integer evaluacionId) {
                 Map<String, String> response = new HashMap<>();
                 try {
-
                         fileService.deleteFiles(evaluacionId);
                         response.put("message", "Archivos eliminados correctamente");
                         return ResponseEntity.ok(response);
@@ -173,12 +221,15 @@ public class FilesController {
         public ResponseEntity<Map<String, String>> deleteDocumento(
                         @RequestParam(name = "solicitudId", required = false) Integer solicitudId,
                         @RequestParam(name = "evaluacionId", required = false) Integer evaluacionId,
+                        @RequestParam(name = "resolucionId", required = false) Integer resolucionId,
                         @RequestParam("tipoDocumento") String tipoDocumento) {
                 Map<String, String> response = new HashMap<>();
                 Boolean isSolicitud = solicitudId != null;
+                Boolean isEvaluacion = evaluacionId != null;
+                Boolean isResolucion = resolucionId != null;
                 try {
                         if (isSolicitud) {
-                                fileService.deleteFile(solicitudId, isSolicitud, tipoDocumento);
+                                fileService.deleteFile(solicitudId, "solicitudId", tipoDocumento);
                                 Solicitud _solicitud = solicitudService.getSolicitudById(solicitudId);
 
                                 switch (tipoDocumento) {
@@ -199,8 +250,10 @@ public class FilesController {
                                 }
 
                                 solicitudService.save(_solicitud);
-                        } else if (!isSolicitud) {
-                                fileService.deleteFile(evaluacionId, isSolicitud, tipoDocumento);
+                        }
+
+                        if (isEvaluacion) {
+                                fileService.deleteFile(evaluacionId, "evaluacionId", tipoDocumento);
                                 Evaluacion _evaluacion = evaluacionService.getEvaluacionById(evaluacionId);
 
                                 switch (tipoDocumento) {
@@ -219,6 +272,29 @@ public class FilesController {
                                 }
 
                                 evaluacionService.save(_evaluacion);
+                        }
+
+                        if (isResolucion) {
+                                fileService.deleteFile(resolucionId, "resolucionId", tipoDocumento);
+                                Resolucion _resolucion = resolucionService.getResolucionById(resolucionId);
+
+                                switch (tipoDocumento) {
+                                        case "anteproyectoAprobado":
+                                                _resolucion.setAnteproyectoAprobado(null);
+                                        case "solicitudComite":
+                                                _resolucion.setSolicitudComite(null);
+                                                break;
+                                        case "solicitudConcejo":
+                                                _resolucion.setSolicitudConcejo(null);
+                                                break;
+                                        case "resolucionConcejo":
+                                                _resolucion.setResolucionConcejo(null);
+                                                break;
+                                        default:
+                                                // Manejar el caso por defecto
+                                }
+
+                                resolucionService.save(_resolucion);
                         }
 
                         response.put("message", "Archivo eliminado correctamente");

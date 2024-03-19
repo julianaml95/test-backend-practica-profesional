@@ -27,6 +27,9 @@ public class Document {
     @Column(name = "evaluacion_id")
     private Integer evaluacionId;
 
+    @Column(name = "resolucion_id")
+    private Integer resolucionId;
+
     @Column(name = "file_name")
     private String fileName;
 

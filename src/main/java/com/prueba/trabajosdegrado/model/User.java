@@ -5,27 +5,31 @@ import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
 @Entity
-@Table(name = "respuesta")
+@Table(name = "users")
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
-public class Respuesta {
+public class User {
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
     private Integer id;
 
-    @Column(name = "titulo")
-    private String titulo;
+    @Column(nullable = false, unique = true)
+    private String email;
 
-    @Column(name = "solicitud", nullable = false)
-    private Integer solicitud;
+    @Column(nullable = false)
+    private String password;
 
-    @Column(name = "finalizado")
-    private Boolean finalizado;
+    @ManyToOne
+    @JoinColumn(name = "user_type_id")
+    private UserType userType;
+
 }

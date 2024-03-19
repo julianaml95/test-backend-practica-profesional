@@ -15,11 +15,17 @@ public interface FileRepository extends JpaRepository<Document, Integer> {
     @Query("SELECT d FROM Document d WHERE d.evaluacionId = ?1 AND d.documentType = ?2")
     Document checkDocumentByEvaluacionId(Integer evaluacionId, String docType);
 
+    @Query("SELECT d FROM Document d WHERE d.resolucionId = ?1 AND d.documentType = ?2")
+    Document checkDocumentByResolucionId(Integer resolucionId, String docType);
+
     @Query("SELECT d.fileName FROM Document d WHERE d.solicitudId = ?1 AND d.documentType = ?2")
     String getUploadSolicitudDocumentPath(Integer solicitudId, String docType);
 
     @Query("SELECT d.fileName FROM Document d WHERE d.evaluacionId = ?1 AND d.documentType = ?2")
     String getUploadEvaluacionDocumentPath(Integer evaluacionId, String docType);
+
+    @Query("SELECT d.fileName FROM Document d WHERE d.resolucionId = ?1 AND d.documentType = ?2")
+    String getUploadResolucionDocumentPath(Integer resolucionId, String docType);
 
     @Transactional
     @Modifying

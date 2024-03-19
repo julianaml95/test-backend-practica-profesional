@@ -11,21 +11,16 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 @Entity
-@Table(name = "respuesta")
+@Table(name = "user_types")
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
-public class Respuesta {
+public class UserType {
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
     private Integer id;
 
-    @Column(name = "titulo")
-    private String titulo;
+    @Column(nullable = false, unique = true)
+    private String name;
 
-    @Column(name = "solicitud", nullable = false)
-    private Integer solicitud;
-
-    @Column(name = "finalizado")
-    private Boolean finalizado;
 }
