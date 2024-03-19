@@ -37,7 +37,7 @@ public class FileService {
         }
     }
 
-    public String storeFile(MultipartFile file, Integer userId, String docType) {
+    public String storeFile(MultipartFile file, Integer id, String paramId, String docType) {
         String originalFileName = StringUtils.cleanPath(file.getOriginalFilename());
         String fileName = "";
 
@@ -53,23 +53,41 @@ public class FileService {
             } catch (Exception e) {
                 fileExtension = "";
             }
-            fileName = userId + "_" + docType + fileExtension;
+            fileName = id + "_" + docType + fileExtension;
             // Copy file to the target location (Replacing existing file with the same name)
             Path targetLocation = this.fileLocation.resolve(fileName);
             Files.copy(file.getInputStream(), targetLocation, StandardCopyOption.REPLACE_EXISTING);
-            Document doc = fileRepository.checkDocumentByUserId(userId, docType);
-            if (doc != null) {
-                doc.setDocumentFormat(file.getContentType());
-                doc.setFileName(fileName);
-                fileRepository.save(doc);
-            } else {
+            Document doc_solicitud = fileRepository.checkDocumentBySolicitudId(id, docType);
+            Document doc_evaluacion = fileRepository.checkDocumentByEvaluacionId(id, docType);
+            Document doc_resolucion = fileRepository.checkDocumentByResolucionId(id, docType);
+
+            if (paramId == "solicitudId") {
                 Document newDoc = new Document();
-                newDoc.setUserId(userId);
+                newDoc.setSolicitudId(id);
                 newDoc.setDocumentFormat(file.getContentType());
                 newDoc.setFileName(fileName);
                 newDoc.setDocumentType(docType);
                 fileRepository.save(newDoc);
+            } else if (paramId == "evaluacionId") {
+                Document newDoc = new Document();
+                newDoc.setEvaluacionId(id);
+                newDoc.setDocumentFormat(file.getContentType());
+                newDoc.setFileName(fileName);
+                newDoc.setDocumentType(docType);
+                fileRepository.save(newDoc);
+            } else if (paramId == "resolucionId") {
+                Document newDoc = new Document();
+                newDoc.setResolucionId(id);
+                newDoc.setDocumentFormat(file.getContentType());
+                newDoc.setFileName(fileName);
+                newDoc.setDocumentType(docType);
+                fileRepository.save(newDoc);
+            } else if (doc_evaluacion != null || doc_solicitud != null || doc_resolucion != null) {
+                doc_evaluacion.setDocumentFormat(file.getContentType());
+                doc_evaluacion.setFileName(fileName);
+                fileRepository.save(doc_evaluacion);
             }
+
             return fileName;
         } catch (IOException ex) {
             throw new FileException("Could not store file " + fileName + ". Please try again!", ex);
@@ -90,13 +108,23 @@ public class FileService {
         }
     }
 
-    public void deleteFile(Integer estudianteId, String tipoDocumento) throws Exception {
+    public void deleteFile(Integer id, String paramId, String tipoDocumento) throws Exception {
         try {
-            Document document = fileRepository.checkDocumentByUserId(estudianteId, tipoDocumento);
-            if (document != null) {
-                fileRepository.delete(document);
+            if (paramId == "solicitudId") {
+                Document solicitud = fileRepository.checkDocumentBySolicitudId(id, tipoDocumento);
+                fileRepository.delete(solicitud);
+            }
+
+            else if (paramId == "evaluacionId") {
+                Document evaluacion = fileRepository.checkDocumentByEvaluacionId(id, tipoDocumento);
+                fileRepository.delete(evaluacion);
+            }
+
+            else if (paramId == "resolucionId") {
+                Document resolucion = fileRepository.checkDocumentByResolucionId(id, tipoDocumento);
+                fileRepository.delete(resolucion);
             } else {
-                throw new FileNotFoundException("Archivo no encontrado para el estudiante " + estudianteId
+                throw new FileNotFoundException("Archivo no encontrado para la solicitud " + id
                         + " y tipo de documento " + tipoDocumento);
             }
         } catch (EntityNotFoundException ex) {
@@ -104,7 +132,19 @@ public class FileService {
         }
     }
 
-    public String getDocumentName(Integer userId, String docType) {
-        return fileRepository.getUploadDocumentPath(userId, docType);
+    public void deleteFiles(Integer evaluacionId) {
+        fileRepository.deleteAllByEvaluacionId(evaluacionId);
+    }
+
+    public String getDocumentSolicitudName(Integer solicitudId, String docType) {
+        return fileRepository.getUploadSolicitudDocumentPath(solicitudId, docType);
+    }
+
+    public String getDocumentEvaluacionName(Integer evaluacionId, String docType) {
+        return fileRepository.getUploadEvaluacionDocumentPath(evaluacionId, docType);
+    }
+
+    public String getDocumentResolucionName(Integer resolucionId, String docType) {
+        return fileRepository.getUploadResolucionDocumentPath(resolucionId, docType);
     }
 }

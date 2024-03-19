@@ -62,6 +62,9 @@ public class SolicitudController {
         _solicitud.setTitulo(solicitud.getTitulo());
         _solicitud.setEstado(solicitud.getEstado());
         _solicitud.setFecha_acta(solicitud.getFecha_acta());
+        _solicitud.setDocente(solicitud.getDocente());
+        _solicitud.setExperto(solicitud.getExperto());
+        _solicitud.setNumero_acta(solicitud.getNumero_acta());
 
         return new ResponseEntity<Solicitud>(solicitudService.save(_solicitud), HttpStatus.OK);
     }

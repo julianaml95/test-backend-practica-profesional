@@ -1,7 +1,13 @@
 package com.prueba.trabajosdegrado.model;
 
+import org.hibernate.annotations.OnDelete;
+import org.hibernate.annotations.OnDeleteAction;
+
+import com.fasterxml.jackson.annotation.JsonIgnore;
+
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
+import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
@@ -20,12 +26,23 @@ import lombok.NoArgsConstructor;
 public class Evaluacion {
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
-    @Column(name = "evaluacion_id")
-    private Integer evaluacionId;
+    private Integer id;
 
-    @ManyToOne
-    @JoinColumn(name = "respuesta")
+    @ManyToOne(fetch = FetchType.LAZY, optional = false)
+    @JoinColumn(name = "respuesta", nullable = false)
+    @OnDelete(action = OnDeleteAction.CASCADE)
+    @JsonIgnore
     private Respuesta respuesta;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "docente")
+    @JsonIgnore
+    private Docente docente;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "experto")
+    @JsonIgnore
+    private Experto experto;
 
     @Column(name = "doc_formato_b")
     private String docFormatoB;
@@ -38,4 +55,7 @@ public class Evaluacion {
 
     @Column(name = "estado_respuesta")
     private String estadoRespuesta;
+
+    @Column(name = "fecha_correcciones")
+    private String fechaCorrecciones;
 }
